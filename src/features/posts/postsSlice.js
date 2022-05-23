@@ -17,6 +17,8 @@ import { client } from '../../api/client'
 //   status: 'idle',
 //   error: null,
 // }
+// createEntityAdapter cria assim:
+// {ids: [], entities: {}}
 
 const postsAdapter = createEntityAdapter({
   sortComparer: (a, b) => b.date.localeCompare(a.date),

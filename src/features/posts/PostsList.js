@@ -4,10 +4,11 @@ import { Link } from 'react-router-dom'
 import { PostAuthor } from './PostAuthor'
 import { ReactionButtons } from './ReactionButtons'
 import { TimeAgo } from './TimeAgo'
-import { selectAllPosts, fetchPosts } from './postsSlice'
 import { Spinner } from '../../components/Spinner'
+import { fetchPosts, selectPostIds, selectPostById } from './postsSlice'
 
-const PostExcerpt = ({ post }) => {
+let PostExcerpt = ({ postId }) => {
+  const post = useSelector((state) => selectPostById(state, postId))
   return (
     <article className="post-excerpt" key={post.id}>
       <h3>{post.title}</h3>
@@ -25,10 +26,13 @@ const PostExcerpt = ({ post }) => {
   )
 }
 
+PostExcerpt = React.memo(PostExcerpt)
+
 export const PostsList = () => {
   const dispatch = useDispatch()
+  const orderedPostIds = useSelector(selectPostIds)
   // const posts = useSelector((state) => state.posts)
-  const posts = useSelector(selectAllPosts)
+  // const posts = useSelector(selectAllPosts) // Foi retirado para otimizar o componente, quando reagir agr atualiza apenas o post e nao a lista toda
   const postStatus = useSelector((state) => state.posts.status)
   const error = useSelector((state) => state.posts.error)
   // const orderedPosts = posts
@@ -46,13 +50,8 @@ export const PostsList = () => {
   if (postStatus === 'loading') {
     content = <Spinner text="Loading..." />
   } else if (postStatus === 'succeeded') {
-    // Sort posts in reverse chronological order by datetime string
-    const orderedPosts = posts
-      .slice()
-      .sort((a, b) => b.date.localeCompare(a.date))
-
-    content = orderedPosts.map((post) => (
-      <PostExcerpt key={post.id} post={post} />
+    content = orderedPostIds.map((postId) => (
+      <PostExcerpt key={postId} postId={postId} />
     ))
   } else if (postStatus === 'failed') {
     content = <div>{error}</div>
